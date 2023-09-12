@@ -52,7 +52,7 @@
       .slides {
         display: flex;
 
-        overflow-x: auto;
+        overflow-x: scroll;
         scroll-snap-type: x mandatory;
 
         scroll-behavior: smooth;
@@ -71,22 +71,21 @@
         flex-direction: column;
       }
 
-
-      .disclaimer {
-        margin: 10px 20px 20px 20px;
-        font-size: 0.75rem;
-        color: #888;
-        position: relative;
+      .ionicon {
+        width: 2rem;
+        height: 2rem;
+        display: block;
+        margin: auto;
       }
 
-      .disclaimer > a {
-        text-decoration: underline;
+      .pagination {
+        margin-bottom: 10px;
       }
     </style>
   </head>
   <body>
     <div class="wrapper">
-      <div class="slides">
+      <div class="slides" id="slides-cont">
         <div class="container" id="news">
             <h1>Neuigkeiten</h1>
         </div>
@@ -128,21 +127,30 @@
           }
           result += "<a href=\"" + link.innerHTML + "\"><item>" + title.outerHTML + desc.outerHTML + "</item></a>"
         }
-        document.getElementById(id).innerHTML += result + "<p class=\"disclaimer\">F&uuml;r die Inhalte der News-Artikel verantwortlich und &copy;-Halter derer: ORF Online und Teletext GmbH & Co KG. Internet: <a href=\"https://orf.at\">ORF.at</a>. Diese Webseite wurde von Manuel H&ouml;lzl erstellt (<a href=\"https://github.com/hoelzlmanuel\">github.com/hoelzlmanuel</a>). &#x1F9A6;</p>"
+        document.getElementById(id).innerHTML += result
       }
 
       window.onload = function() {
         fetch("https://rss.orf.at/news.xml").then(function(response) {
           return response.text()
         }).then(data => parse(data, "news"))
+        .then(() => {
+          document.getElementById("news").innerHTML += '<div class="pagination"><svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512"><circle cx="256" cy="256" r="32" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="24"/><circle cx="416" cy="256" r="32" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="24"/><circle cx="96" cy="256" r="32" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" stroke-width="24"/></svg></div>'
+        })
 
         fetch("https://rss.orf.at/science.xml").then(function(response) {
           return response.text()
         }).then(data => parse(data, "science"))
+        .then(() => {
+          document.getElementById("science").innerHTML += '<div class="pagination"><svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512"><circle cx="256" cy="256" r="32" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" stroke-width="24"/><circle cx="416" cy="256" r="32" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="24"/><circle cx="96" cy="256" r="32" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="24"/></svg></div>'
+        })
 
         fetch("https://rss.orf.at/wien.xml").then(function(response) {
           return response.text()
         }).then(data => parse(data, "vienna"))
+        .then(() => {
+          document.getElementById("vienna").innerHTML += '<div class="pagination"><svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512"><circle cx="256" cy="256" r="32" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="24"/><circle cx="416" cy="256" r="32" fill="currentColor" stroke="currentColor" stroke-miterlimit="10" stroke-width="24"/><circle cx="96" cy="256" r="32" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="24"/></svg></div>'
+        })
       }
     </script>
   </body>
