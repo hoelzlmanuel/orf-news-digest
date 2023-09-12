@@ -14,27 +14,18 @@
       }
 
       .wrapper {
-        max-width: 1240px;
-        min-height: calc(100vh - 40px);
-        padding: 20px;
         margin: 0 auto;
         position: relative;
       }
 
       h1 {
-        margin: 20px;
-        margin-top: 0px;
-        margin-left: 0px;
+        margin: 20px 20px 10px 20px;
       }
 
-      .container {
-        width: fit-content;
-        margin: 0 auto;
-        
-        display: flex;
-        flex-wrap: wrap;
-        
-        grid-gap: 20px;
+
+      a {
+        text-decoration: none;
+        color: inherit;
       }
 
       item {
@@ -44,10 +35,10 @@
         box-shadow: 2px 2px 5px 2px rgba(0,0,0,0.1);
         display: flex;
         flex-direction: column;
-        min-height: 100%;
-        max-width: 20rem;
+        max-width: 500px;
         padding: 20px;
         border-radius: 1rem;
+        margin: 10px 20px 10px 20px;
       }
 
       item title {
@@ -58,91 +49,100 @@
         color: black;
       }
 
-      item description {
-        height: 100%;
-        margin-bottom: 0.5rem;
+      .slides {
+        display: flex;
+
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
       }
 
-      item a {
-        margin-bottom: 0.5rem;
-        color: black;
-        align-self: flex-end;
+      .container {
+        scroll-snap-align: start;
+        flex-shrink: 0;
+        height: fit-content;
+        width: 100vw;
+        height: 100vh;
+        max-height: -webkit-fill-available;
+        overflow-y: scroll;
+        display: flex;
+        flex-direction: column;
       }
 
-      item dc\:subject {
-        margin-bottom: 0.5rem;
-        align-self: flex-end;
-        font-weight: bold;
-      }
-
-      item dc\:date {
-        align-self: flex-end;
-      }
-
-      item orfon\:usid {
-        display: none;
-      }
-
-      .ionicon {
-        width: 1.5rem;
-        height: 1.5rem;
-      }
 
       .disclaimer {
-        margin-bottom: 20px;
-        margin-right: 20px;
+        margin: 10px 20px 20px 20px;
         font-size: 0.75rem;
         color: #888;
-        position: absolute;
-        bottom: 0px;
+        position: relative;
       }
 
-      @media screen and (max-width: 400px) {
-          .disclaimer {
-            position: relative;
-            margin-top: 20px;
-            margin-bottom: 0px;
-            margin-right: 0px;
-          }
-      }
-
-      .disclaimer a {
-        color: #888;
+      .disclaimer > a {
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
     <div class="wrapper">
-      <h1>ORF-News</h1>
-      <div class="container" id="content"></div>
-      <p class="disclaimer">Für die Inhalte der News-Artikel verantwortlich und &copy;-Halter derer: ORF Online und Teletext GmbH & Co KG. Internet: <a href="https://orf.at">ORF.at</a>. Diese Webseite wurde von Manuel Hölzl erstellt (<a href="https://github.com/hoelzlmanuel">github.com/hoelzlmanuel</a>).</p>
+      <div class="slides">
+        <div class="container" id="news">
+            <h1>Neuigkeiten</h1>
+        </div>
+        <div class="container" id="science">
+            <h1>Wissenschaft</h1>
+        </div>
+        <div class="container" id="vienna">
+            <h1>Wien</h1>
+        </div>
+      </div>
     </div>
     <script>
+      parse = function(data, id) {
+        let parser = new DOMParser()
+        let xmlDoc = parser.parseFromString(data, "text/xml")
+        let items = xmlDoc.getElementsByTagName("item")
+        let result = ""
+        for (const i of items) {
+          let hasDesc = false
+          for (const c of i.children) {
+            if (c.tagName === "description") {
+              hasDesc = true
+            }
+          }
+          if (!hasDesc) continue
+          let title, link, desc, category
+          for (const c of i.children) {
+            switch (c.tagName) {
+              case "title":
+                title = c
+                break
+              case "link":
+                link = c
+                break
+              case "description":
+                desc = c
+                break
+            }
+          }
+          result += "<a href=\"" + link.innerHTML + "\"><item>" + title.outerHTML + desc.outerHTML + "</item></a>"
+        }
+        document.getElementById(id).innerHTML += result + "<p class=\"disclaimer\">F&uuml;r die Inhalte der News-Artikel verantwortlich und &copy;-Halter derer: ORF Online und Teletext GmbH & Co KG. Internet: <a href=\"https://orf.at\">ORF.at</a>. Diese Webseite wurde von Manuel H&ouml;lzl erstellt (<a href=\"https://github.com/hoelzlmanuel\">github.com/hoelzlmanuel</a>). &#x1F9A6;</p>"
+      }
+
       window.onload = function() {
         fetch("https://rss.orf.at/news.xml").then(function(response) {
           return response.text()
-        }).then(function(data) {
-          let parser = new DOMParser()
-          let xmlDoc = parser.parseFromString(data, "text/xml")
-          let items = xmlDoc.getElementsByTagName("item")
-          let result = ""
-          for (const i of items) {
-            for (const c of i.children) {
-              if (c.tagName === "dc:date") {
-                c.innerHTML = c.innerHTML.replace(/(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)\+\d\d:\d\d/, function(match, p1,p2,p3,p4,p5,p6, offset, string) {
-                  return "" + p4 + ":" + p5 + " Uhr, " + p3 + "." + p2 + "." + p1
-                })
-              }
-            }
-            for (const c of i.children) {
-              if (c.tagName === "description") {
-                result += i.outerHTML
-                break
-              }
-            }
-          }
-          document.getElementById("content").innerHTML = result.replace(/<link>/g, "<a href=\"").replace(/<\/link>/g, "\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"ionicon\" viewBox=\"0 0 512 512\"><title>Open</title><path d=\"M384 224v184a40 40 0 01-40 40H104a40 40 0 01-40-40V168a40 40 0 0140-40h167.48M336 64h112v112M224 288L440 72\" fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"32\"/></svg></a>")
-        })
+        }).then(data => parse(data, "news"))
+
+        fetch("https://rss.orf.at/science.xml").then(function(response) {
+          return response.text()
+        }).then(data => parse(data, "science"))
+
+        fetch("https://rss.orf.at/wien.xml").then(function(response) {
+          return response.text()
+        }).then(data => parse(data, "vienna"))
       }
     </script>
   </body>
