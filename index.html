@@ -5,6 +5,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="favicon.png"> <!--Urheber: ORF.at-->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
+    <meta name="color-scheme" content="light">
     <!-- Apple Mobile Web App Setup -->
 
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -133,7 +134,7 @@
                 break
             }
           }
-          result += "<a href=\"" + link.innerHTML + "\"><item>" + title.outerHTML + desc.outerHTML + "</item></a>"
+          result += "<a href=\"" + link.innerHTML + "\" target=\"_blank\" rel=\"noopener noreferrer\"><item>" + title.outerHTML + desc.outerHTML + "</item></a>"
         }
         document.getElementById(id).innerHTML += result
       }
